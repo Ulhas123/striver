@@ -104,7 +104,7 @@
           <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-52 rounded-xl bg-slate-900 border border-slate-700 shadow-xl py-1.5 z-50 text-sm text-slate-200">
             <button id="btn-open-sync-modal" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2">
               <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
-              GitHub Cloud Sync Settings
+              Cloud Sync (Cross-Device)
             </button>
             <button id="btn-sync-now" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -445,17 +445,17 @@
     </div>
   </div>
 
-  <!-- Modal: GitHub Cloud Sync Settings -->
+  <!-- Modal: Cloud Sync (Password Only) -->
   <div id="modal-github-sync" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden">
     <div class="glass-panel w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-700 space-y-4">
       <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
           </div>
           <div>
-            <h3 class="text-base font-bold text-white">GitHub Cloud Sync</h3>
-            <p class="text-xs text-slate-400">Sync your progress across all devices using a private GitHub Gist.</p>
+            <h3 class="text-base font-bold text-white">Automatic Cloud Sync</h3>
+            <p class="text-xs text-slate-400">Sync your progress across all devices using only a password.</p>
           </div>
         </div>
         <button id="btn-close-sync-modal-x" class="text-slate-400 hover:text-white p-1 rounded-lg">
@@ -468,28 +468,23 @@
         <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
           <div class="flex items-center gap-2 text-xs text-emerald-300 font-semibold">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Cloud Sync Active</span>
+            <span>Cloud Sync Active • Auto-Syncing</span>
           </div>
           <span id="sync-last-time" class="text-[11px] text-slate-400">Synced just now</span>
         </div>
 
-        <div class="space-y-2 text-xs text-slate-300 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 font-mono">
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-slate-400">Backup Gist:</span>
-            <a id="sync-gist-link" href="#" target="_blank" class="text-sky-400 underline font-semibold">View on GitHub ↗</a>
+            <span class="text-slate-400">Status:</span>
+            <span class="text-emerald-400 font-semibold">Connected to Cloud Backup</span>
           </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-400">Gist ID:</span>
-            <span id="sync-gist-id-display" class="text-slate-200"></span>
-          </div>
+          <p class="text-slate-400 leading-relaxed pt-1">
+            📱 <strong>Using on phone or another laptop?</strong> Just open this website on that device, click <strong class="text-slate-200">Cloud Sync</strong>, and enter your exact same password. All your progress will instantly sync!
+          </p>
         </div>
 
-        <p class="text-xs text-slate-400">
-          💡 <strong>Syncing to another device?</strong> Copy the Gist ID above, open this website on your other device, and connect with your token + Gist ID.
-        </p>
-
         <div class="flex items-center justify-between pt-2">
-          <button id="btn-disconnect-sync" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Disconnect Sync</button>
+          <button id="btn-disconnect-sync" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Disconnect / Change Password</button>
           <div class="flex items-center gap-2">
             <button id="btn-close-sync-modal" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold">Close</button>
             <button id="btn-trigger-manual-sync" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-bold transition flex items-center gap-1.5 shadow">
@@ -503,38 +498,31 @@
       <!-- Disconnected Setup View -->
       <div id="sync-setup-view" class="space-y-4">
         <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 space-y-2">
-          <p class="font-semibold text-white">How it works:</p>
-          <ol class="list-decimal list-inside space-y-1 text-slate-400">
-            <li>Generate a GitHub Personal Access Token with only <strong class="text-white">gist</strong> permission.</li>
-            <li>Paste your token below. A secret private Gist is created to store your progress.</li>
-            <li>Every solved checkbox or note automatically syncs to your private GitHub backup.</li>
-          </ol>
-          <div class="pt-1">
-            <a href="https://github.com/settings/tokens/new?scopes=gist&description=Striver+DSA+Tracker+Sync" target="_blank" class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-semibold text-xs underline">
-              <span>👉 Generate Token on GitHub (Pre-configured) ↗</span>
-            </a>
-          </div>
+          <p class="font-semibold text-white flex items-center gap-1.5">
+            <span>🔒</span> <span>100% Automatic • No GitHub Token & No Username</span>
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li>Type any password below (e.g. <code class="text-indigo-300 bg-slate-800 px-1 py-0.5 rounded">MyDSA2026</code>).</li>
+            <li>Every solved checkbox and note saves automatically to the cloud.</li>
+            <li>Enter the <strong>same password on your phone or laptop</strong> to keep them in real-time sync.</li>
+          </ul>
         </div>
 
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub Personal Access Token (classic):</label>
-            <input type="password" id="input-sync-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold text-slate-300">Choose Your Secret Sync Password:</label>
+          <div class="relative">
+            <input type="password" id="input-sync-password" placeholder="Enter a password (e.g. MySecretPass123)" class="w-full pl-3 pr-10 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <button type="button" id="btn-toggle-password-visibility" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1" title="Show/Hide Password">
+              <svg id="icon-eye" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
           </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-semibold text-slate-300">Existing Gist ID (Optional):</label>
-              <span class="text-[11px] text-slate-500">Only needed on 2nd device</span>
-            </div>
-            <input type="text" id="input-sync-gist-id" placeholder="Leave empty for new backup, or paste Gist ID from other device" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
+          <p class="text-[11px] text-slate-500">Remember this password to connect your phone or other computers.</p>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
           <button id="btn-close-sync-modal-cancel" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold">Cancel</button>
           <button id="btn-connect-sync" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-bold transition flex items-center gap-1.5 shadow">
-            <span>Connect & Start Syncing</span>
+            <span>Connect & Sync</span>
           </button>
         </div>
       </div>

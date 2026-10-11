@@ -55,16 +55,40 @@
     }
   }
 
-  // --- GitHub Gist Cloud Sync Module ---
-  const SYNC_CONFIG_KEY = 'striver_github_sync_config_v1';
+  // --- Password-Only Cloud Sync Module ---
+  const SYNC_CONFIG_KEY = 'striver_cloud_sync_config_v2';
+  const KV_REGISTRY_APP_KEY = 'ftoqt8yv';
+  const CLOUD_OBJECTS_URL = 'https://api.restful-api.dev/objects';
   let syncDebounceTimer = null;
+
+  async function hashPassword(password) {
+    const raw = 'striver_a2z_salt_2025_' + password.trim();
+    try {
+      if (window.crypto && window.crypto.subtle && window.crypto.subtle.digest) {
+        const enc = new TextEncoder();
+        const data = enc.encode(raw);
+        const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
+      }
+    } catch (e) {}
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < raw.length; i++) {
+      const ch = raw.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = ((h1 ^ (h1 >>> 16)) >>> 0).toString(16).padStart(8, '0');
+    h2 = ((h2 ^ (h2 >>> 16)) >>> 0).toString(16).padStart(8, '0');
+    return (h1 + h2 + h1 + h2).substring(0, 32);
+  }
 
   function getSyncConfig() {
     try {
       const saved = localStorage.getItem(SYNC_CONFIG_KEY);
       if (saved) return JSON.parse(saved);
     } catch(e) {}
-    return { token: '', gistId: '', autoSync: false, lastSynced: null };
+    return { password: '', cloudId: '', autoSync: false, lastSynced: null };
   }
 
   function saveSyncConfig(cfg) {
@@ -81,20 +105,13 @@
 
     const connectedView = document.getElementById('sync-connected-view');
     const setupView = document.getElementById('sync-setup-view');
-    const gistLink = document.getElementById('sync-gist-link');
-    const gistIdDisplay = document.getElementById('sync-gist-id-display');
     const lastTimeDisplay = document.getElementById('sync-last-time');
 
-    const isConnected = !!(cfg.token && cfg.gistId);
+    const isConnected = !!(cfg.cloudId && cfg.autoSync);
 
     if (isConnected) {
       if (connectedView) connectedView.classList.remove('hidden');
       if (setupView) setupView.classList.add('hidden');
-      if (gistLink) {
-        gistLink.href = 'https://gist.github.com/' + cfg.gistId;
-        gistLink.textContent = 'gist.github.com/' + cfg.gistId.slice(0, 10) + '... ↗';
-      }
-      if (gistIdDisplay) gistIdDisplay.textContent = cfg.gistId;
       if (lastTimeDisplay) {
         const d = cfg.lastSynced ? new Date(cfg.lastSynced).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Never';
         lastTimeDisplay.textContent = 'Last synced: ' + d;
@@ -122,32 +139,30 @@
 
   function triggerCloudSync() {
     const cfg = getSyncConfig();
-    if (!cfg.token || !cfg.gistId || !cfg.autoSync) return;
+    if (!cfg.cloudId || !cfg.autoSync) return;
 
     if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
     updateSyncUI('Syncing...', 'syncing');
 
     syncDebounceTimer = setTimeout(async () => {
       try {
-        const response = await fetch('https://api.github.com/gists/' + cfg.gistId, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': 'Bearer ' + cfg.token,
-            'Accept': 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            description: 'Striver DSA Tracker Progress Backup (Private)',
-            files: {
-              'striver_progress.json': {
-                content: JSON.stringify({
-                  version: '3.0',
-                  updatedAt: new Date().toISOString(),
-                  state: state
-                }, null, 2)
-              }
+        const payload = {
+          name: 'striver_sync_v3',
+          data: {
+            version: '3.0',
+            updatedAt: new Date().toISOString(),
+            state: {
+              completed: state.completed,
+              starred: state.starred,
+              notes: state.notes
             }
-          })
+          }
+        };
+
+        const response = await fetch(`${CLOUD_OBJECTS_URL}/${cfg.cloudId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
 
         if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -161,27 +176,17 @@
     }, 1500);
   }
 
-  async function pullFromGist(manual = false) {
+  async function pullFromCloud(manual = false) {
     const cfg = getSyncConfig();
-    if (!cfg.token || !cfg.gistId) return;
+    if (!cfg.cloudId) return;
 
     updateSyncUI('Syncing...', 'syncing');
 
     try {
-      const response = await fetch('https://api.github.com/gists/' + cfg.gistId, {
-        headers: {
-          'Authorization': 'Bearer ' + cfg.token,
-          'Accept': 'application/vnd.github+json'
-        }
-      });
-
+      const response = await fetch(`${CLOUD_OBJECTS_URL}/${cfg.cloudId}`);
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const data = await response.json();
-      const file = data.files && data.files['striver_progress.json'];
-      if (!file || !file.content) throw new Error('File not found in Gist');
-
-      const parsed = JSON.parse(file.content);
-      const remoteState = parsed.state || parsed;
+      const remoteState = (data.data && data.data.state) ? data.data.state : (data.data || {});
 
       let changed = false;
       Object.keys(remoteState.completed || {}).forEach(k => {
@@ -210,81 +215,78 @@
         state.lastActive = new Date().toISOString();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         renderAll();
-        if (manual) showToast('Progress synced with GitHub Gist! ☁️', 'success');
+        if (manual) showToast('Progress synced across devices! ☁️', 'success');
       }
       updateSyncUI('Synced', 'success');
     } catch (err) {
-      console.error('Failed to pull from Gist', err);
+      console.error('Failed to pull from Cloud', err);
       updateSyncUI('Sync Error', 'error');
-      if (manual) showToast('GitHub Sync error: ' + err.message, 'error');
+      if (manual) showToast('Cloud Sync error: ' + err.message, 'error');
     }
   }
 
-  async function connectNewGist(token) {
-    showToast('Creating private backup Gist on GitHub...', 'info');
+  async function connectWithPassword(password) {
+    showToast('Connecting to Cloud Sync...', 'info');
     try {
-      const response = await fetch('https://api.github.com/gists', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          description: 'Striver DSA Tracker Progress Backup (Private)',
-          public: false,
-          files: {
-            'striver_progress.json': {
-              content: JSON.stringify({
-                version: '3.0',
-                updatedAt: new Date().toISOString(),
-                state: state
-              }, null, 2)
-            }
-          }
-        })
-      });
+      const hash = await hashPassword(password);
+      
+      // Step 1: Query pointer registry to check if this password already has a cloud record
+      const ptrRes = await fetch(`https://keyvalue.immanuel.co/api/KeyVal/GetValue/${KV_REGISTRY_APP_KEY}/${hash}`);
+      let pointer = (await ptrRes.text()).replace(/["\s]/g, '');
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || 'HTTP ' + response.status);
+      let cloudId = pointer;
+      let isExisting = false;
+
+      if (pointer && pointer !== 'null' && pointer.length > 5) {
+        // Existing backup found! Pull and merge
+        cloudId = pointer;
+        isExisting = true;
+      } else {
+        // New password: create initial cloud record
+        const createRes = await fetch(CLOUD_OBJECTS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'striver_sync_' + hash.slice(0, 8),
+            data: {
+              version: '3.0',
+              updatedAt: new Date().toISOString(),
+              state: {
+                completed: state.completed,
+                starred: state.starred,
+                notes: state.notes
+              }
+            }
+          })
+        });
+
+        if (!createRes.ok) throw new Error('Failed to create cloud record (HTTP ' + createRes.status + ')');
+        const created = await createRes.json();
+        cloudId = created.id;
+
+        // Save pointer in registry
+        await fetch(`https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${KV_REGISTRY_APP_KEY}/${hash}/${cloudId}`, {
+          method: 'POST'
+        });
       }
 
-      const gist = await response.json();
       const cfg = {
-        token: token,
-        gistId: gist.id,
+        password: password,
+        cloudId: cloudId,
         autoSync: true,
         lastSynced: new Date().toISOString()
       };
       saveSyncConfig(cfg);
-      showToast('Connected to GitHub Gist! Cloud sync is active 🚀', 'success');
-      return true;
-    } catch (err) {
-      showToast('GitHub Connection Error: ' + err.message, 'error');
-      return false;
-    }
-  }
 
-  async function connectExistingGist(token, gistId) {
-    showToast('Connecting to existing Gist...', 'info');
-    try {
-      const response = await fetch('https://api.github.com/gists/' + gistId, {
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Accept': 'application/vnd.github+json'
-        }
-      });
-      if (!response.ok) throw new Error('Gist not found or unauthorized (HTTP ' + response.status + ')');
-      const cfg = {
-        token: token,
-        gistId: gistId,
-        autoSync: true,
-        lastSynced: new Date().toISOString()
-      };
-      saveSyncConfig(cfg);
-      await pullFromGist(true);
-      showToast('Connected to existing Gist and progress synced!', 'success');
+      if (isExisting) {
+        await pullFromCloud(true);
+        // Also push back merged state so cloud has union of both devices
+        triggerCloudSync();
+        showToast('Connected! Progress synced from your cloud backup 🚀', 'success');
+      } else {
+        showToast('Connected! Cloud backup created for this password 🚀', 'success');
+      }
+
       return true;
     } catch (err) {
       showToast('Connection failed: ' + err.message, 'error');
@@ -293,8 +295,8 @@
   }
 
   function disconnectSync() {
-    saveSyncConfig({ token: '', gistId: '', autoSync: false, lastSynced: null });
-    showToast('GitHub Cloud Sync disconnected', 'info');
+    saveSyncConfig({ password: '', cloudId: '', autoSync: false, lastSynced: null });
+    showToast('Cloud Sync disconnected', 'info');
   }
 
 
@@ -1373,36 +1375,41 @@
     if (btnCloseSync) btnCloseSync.addEventListener('click', closeSyncModal);
     if (btnCloseSyncCancel) btnCloseSyncCancel.addEventListener('click', closeSyncModal);
 
+    // Show/hide password visibility toggle
+    const btnTogglePwd = document.getElementById('btn-toggle-password-visibility');
+    const pwdInput = document.getElementById('input-sync-password');
+    if (btnTogglePwd && pwdInput) {
+      btnTogglePwd.addEventListener('click', () => {
+        const isPwd = pwdInput.type === 'password';
+        pwdInput.type = isPwd ? 'text' : 'password';
+      });
+    }
+
     // Connect button
     const btnConnectSync = document.getElementById('btn-connect-sync');
     if (btnConnectSync) {
       btnConnectSync.addEventListener('click', async () => {
-        const tokenInput = document.getElementById('input-sync-token');
-        const gistIdInput = document.getElementById('input-sync-gist-id');
-        const token = tokenInput ? tokenInput.value.trim() : '';
-        const gistId = gistIdInput ? gistIdInput.value.trim() : '';
+        const pwd = pwdInput ? pwdInput.value.trim() : '';
 
-        if (!token) {
-          showToast('Please enter your GitHub Personal Access Token', 'error');
+        if (!pwd) {
+          showToast('Please enter a secret password', 'error');
+          return;
+        }
+        if (pwd.length < 3) {
+          showToast('Password should be at least 3 characters', 'error');
           return;
         }
 
         btnConnectSync.disabled = true;
         btnConnectSync.textContent = 'Connecting...';
 
-        let success = false;
-        if (gistId) {
-          success = await connectExistingGist(token, gistId);
-        } else {
-          success = await connectNewGist(token);
-        }
+        const success = await connectWithPassword(pwd);
 
         btnConnectSync.disabled = false;
-        btnConnectSync.textContent = 'Connect & Start Syncing';
+        btnConnectSync.textContent = 'Connect & Sync';
 
         if (success) {
-          if (tokenInput) tokenInput.value = '';
-          if (gistIdInput) gistIdInput.value = '';
+          if (pwdInput) pwdInput.value = '';
           updateSyncUI();
         }
       });
@@ -1423,12 +1430,12 @@
     if (btnSyncNow) {
       btnSyncNow.addEventListener('click', () => {
         if (menuDropdown) menuDropdown.classList.add('hidden');
-        pullFromGist(true);
+        pullFromCloud(true);
       });
     }
     if (btnTriggerManualSync) {
       btnTriggerManualSync.addEventListener('click', () => {
-        pullFromGist(true);
+        pullFromCloud(true);
       });
     }
 
@@ -1449,7 +1456,7 @@
     initEvents();
     renderAll();
     updateSyncUI();
-    pullFromGist(false);
+    pullFromCloud(false);
   });
 
 })();
