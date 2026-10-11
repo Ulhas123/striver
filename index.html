@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Striver A2Z DSA Tracker • All Platforms & LeetCode</title>
+  <meta name="description" content="Interactive DSA progress tracker for Striver's A2Z Sheet covering all 456 problems across LeetCode, GeeksforGeeks, Code360, and TakeUForward." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            plat: {
+              lc: '#f59e0b',
+              gfg: '#10b981',
+              cn: '#3b82f6',
+              yt: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-200">
+
+  <!-- Background decorative glow -->
+  <div class="fixed inset-0 pointer-events-none gradient-glow -z-10"></div>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80 transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-bold text-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
+              Striver A2Z
+              <span class="text-xs uppercase font-extrabold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">All Platforms</span>
+            </h1>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">456 Total Problems • 18 Steps Roadmap</p>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- LeetCode Only Toggle Switch -->
+        <label class="hidden sm:flex items-center gap-2 cursor-pointer bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl hover:border-slate-700 transition" title="Filter to show only LeetCode questions">
+          <span class="text-xs font-semibold text-amber-400 flex items-center gap-1">
+            <span>⚡ LC Only</span>
+          </span>
+          <div class="relative inline-block w-8 h-4 align-middle select-none">
+            <input type="checkbox" id="toggle-lc-only" class="sr-only peer" />
+            <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500"></div>
+          </div>
+        </label>
+
+        <!-- Random Problem Button -->
+        <button id="btn-random" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition-all hover:scale-105 active:scale-95" title="Pick a random problem">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+          </svg>
+          <span class="hidden md:inline">Pick Random</span>
+          <span class="md:hidden">Random</span>
+        </button>
+
+        <!-- Backup & Actions Dropdown -->
+        <div class="relative">
+          <button id="btn-menu-toggle" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition" title="Data & Settings">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          </button>
+          
+          <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-52 rounded-xl bg-slate-900 border border-slate-700 shadow-xl py-1.5 z-50 text-sm text-slate-200">
+            <button id="btn-export" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Export Progress (JSON)
+            </button>
+            <button id="btn-import-trigger" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              Import Backup (JSON)
+            </button>
+            <div class="h-px bg-slate-800 my-1"></div>
+            <button id="btn-reset-trigger" class="w-full text-left px-3.5 py-2 hover:bg-rose-950/40 text-rose-400 flex items-center gap-2">
+              <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              Reset All Progress
+            </button>
+          </div>
+        </div>
+
+        <!-- Dark / Light Theme Toggle -->
+        <button id="btn-theme" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition" title="Toggle Light / Dark mode">
+          <svg id="theme-icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Hero Analytics Dashboard -->
+    <section class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-800/80">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        
+        <!-- Overall Progress Circle & Main Info -->
+        <div class="lg:col-span-5 flex flex-col sm:flex-row items-center gap-5 sm:gap-6 border-b lg:border-b-0 lg:border-r border-slate-800/80 pb-6 lg:pb-0 lg:pr-6">
+          <div class="relative w-28 h-28 flex-shrink-0 flex items-center justify-center">
+            <svg class="w-28 h-28">
+              <circle class="text-slate-800" stroke-width="8" stroke="currentColor" fill="transparent" r="46" cx="56" cy="56" />
+              <circle id="overall-circle-bar" class="text-indigo-500 progress-ring__circle" stroke-width="8" stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round" stroke="currentColor" fill="transparent" r="46" cx="56" cy="56" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+              <span id="overall-percent" class="text-2xl font-extrabold text-white tracking-tight">0%</span>
+              <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Solved</span>
+            </div>
+          </div>
+          <div class="text-center sm:text-left space-y-1">
+            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Your DSA Tracker</span>
+            <h2 class="text-2xl font-bold text-white tracking-tight">
+              <span id="overall-solved-count">0</span> <span id="overall-total-count" class="text-slate-400 text-lg font-normal">/ 456 Problems</span>
+            </h2>
+            <p class="text-xs text-slate-400">All progress is automatically saved to your browser local storage.</p>
+            <div class="flex items-center gap-2 pt-1 justify-center sm:justify-start">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                ⭐ <span id="stat-starred-count">0</span> Bookmarked
+              </span>
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                📝 <span id="stat-notes-count">0</span> Notes
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Difficulty Breakdown Cards -->
+        <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          
+          <!-- Easy Card -->
+          <div class="rounded-xl bg-slate-900/60 border border-slate-800/80 p-3.5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Easy
+              </span>
+              <span id="easy-percent" class="text-xs font-semibold text-slate-400">0%</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-baseline justify-between text-sm">
+                <span id="easy-count" class="text-lg font-bold text-white">0</span>
+                <span id="easy-total" class="text-xs text-slate-400">/ 145</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="easy-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medium Card -->
+          <div class="rounded-xl bg-slate-900/60 border border-slate-800/80 p-3.5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Medium
+              </span>
+              <span id="medium-percent" class="text-xs font-semibold text-slate-400">0%</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-baseline justify-between text-sm">
+                <span id="medium-count" class="text-lg font-bold text-white">0</span>
+                <span id="medium-total" class="text-xs text-slate-400">/ 222</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="medium-bar" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hard Card -->
+          <div class="rounded-xl bg-slate-900/60 border border-slate-800/80 p-3.5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span> Hard
+              </span>
+              <span id="hard-percent" class="text-xs font-semibold text-slate-400">0%</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-baseline justify-between text-sm">
+                <span id="hard-count" class="text-lg font-bold text-white">0</span>
+                <span id="hard-total" class="text-xs text-slate-400">/ 89</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="hard-bar" class="bg-rose-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Filters & Controls Bar -->
+    <section class="glass-panel rounded-2xl p-4 shadow-lg border border-slate-800/80 space-y-4">
+      
+      <!-- Row 1: Search + Jump + Sort + Collapse Toggle -->
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        
+        <!-- Search Input -->
+        <div class="relative flex-grow max-w-md">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search problem, #number, or tag..." 
+            class="w-full pl-10 pr-9 py-2 rounded-xl bg-slate-900/90 text-sm text-white placeholder-slate-400 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+          />
+          <button id="btn-clear-search" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white hidden">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Jump to Step Selector, Sort By & Accordion Toggle -->
+        <div class="flex items-center gap-2 flex-wrap">
+          
+          <!-- Step Jump -->
+          <select id="step-jump-select" class="px-3 py-2 rounded-xl bg-slate-900 text-xs sm:text-sm text-slate-200 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="all">Jump to Step...</option>
+          </select>
+
+          <!-- Sort Select -->
+          <select id="sort-select" class="px-3 py-2 rounded-xl bg-slate-900 text-xs sm:text-sm text-slate-200 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Sort questions">
+            <option value="default">Sort: Default</option>
+            <option value="lcNumber">Sort: LeetCode #</option>
+            <option value="title">Sort: Title (A-Z)</option>
+            <option value="diffAsc">Sort: Easy → Hard</option>
+            <option value="diffDesc">Sort: Hard → Easy</option>
+          </select>
+
+          <!-- Collapse All Button -->
+          <button id="btn-toggle-all-steps" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs sm:text-sm font-medium text-slate-300 border border-slate-700/80 transition flex items-center gap-1.5">
+            <svg id="icon-collapse-all" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            <span id="text-toggle-all-steps">Collapse All</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Row 2: Platform Filter Pills (LeetCode, GFG, Code360, Video) -->
+      <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1 mr-1">
+            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            Platform:
+          </span>
+          <button data-filter-platform="all" class="filter-platform-btn active px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition">All (456)</button>
+          <button data-filter-platform="leetcode" class="filter-platform-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/30 transition flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> LeetCode (284)
+          </button>
+          <button data-filter-platform="gfg" class="filter-platform-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 transition flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> GeeksforGeeks (355)
+          </button>
+          <button data-filter-platform="code360" class="filter-platform-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-blue-400 border border-blue-500/30 transition flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Code360 (226)
+          </button>
+          <button data-filter-platform="youtube" class="filter-platform-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-rose-400 border border-rose-500/30 transition flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Video Solutions (220)
+          </button>
+        </div>
+      </div>
+
+      <!-- Row 3: Difficulty & Status Filters -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+        
+        <!-- Difficulty Filters -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-semibold text-slate-400 mr-1 hidden sm:inline">Difficulty:</span>
+          <button data-filter-diff="all" class="filter-diff-btn active px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white transition">All</button>
+          <button data-filter-diff="Easy" class="filter-diff-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 transition">Easy</button>
+          <button data-filter-diff="Medium" class="filter-diff-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/30 transition">Medium</button>
+          <button data-filter-diff="Hard" class="filter-diff-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-rose-400 border border-rose-500/30 transition">Hard</button>
+        </div>
+
+        <!-- Status Filters -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-semibold text-slate-400 mr-1 hidden sm:inline">Status:</span>
+          <button data-filter-status="all" class="filter-status-btn active px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white transition">All</button>
+          <button data-filter-status="solved" class="filter-status-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">Solved</button>
+          <button data-filter-status="unsolved" class="filter-status-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">Unsolved</button>
+          <button data-filter-status="starred" class="filter-status-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 transition">⭐ Starred</button>
+          <button data-filter-status="notes" class="filter-status-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-blue-300 border border-blue-500/30 transition">📝 Notes</button>
+
+          <!-- Reset Filter Button -->
+          <button id="btn-clear-filters" class="hidden text-xs text-slate-400 hover:text-white underline ml-2">Reset</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Active Filters Summary Banner -->
+    <div id="filter-banner" class="hidden flex items-center justify-between text-xs px-4 py-2 rounded-xl bg-indigo-950/40 border border-indigo-800/40 text-indigo-300">
+      <span>Showing filtered results: <strong id="filter-match-count" class="text-white">0</strong> matching questions</span>
+      <button id="btn-banner-clear" class="text-xs font-semibold text-indigo-400 hover:text-white underline">Clear All Filters</button>
+    </div>
+
+    <!-- Questions Container (Rendered dynamically) -->
+    <div id="steps-container" class="space-y-4">
+      <!-- Steps cards inserted here -->
+    </div>
+
+    <!-- Empty Results State -->
+    <div id="no-results" class="hidden text-center py-16 px-4 space-y-3">
+      <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <h3 class="text-lg font-bold text-white">No questions match your filter</h3>
+      <p class="text-sm text-slate-400 max-w-sm mx-auto">Try clearing your search query or selecting a different platform.</p>
+      <button id="btn-empty-reset" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition shadow">
+        Clear All Filters
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-400 space-y-1">
+    <p>Striver A2Z DSA Sheet • Multi-Platform Interactive Edition (LeetCode, GFG, Code360, TUF)</p>
+    <p>All progress, bookmarks, and notes are securely stored in your local browser storage.</p>
+  </footer>
+
+  <!-- Modal: Notes Editor -->
+  <div id="modal-notes" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-700 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span id="modal-notes-lc" class="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">LC #</span>
+          <h3 id="modal-notes-title" class="text-lg font-bold text-white mt-1">Problem Title</h3>
+        </div>
+        <button id="btn-close-notes-x" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="modal-notes-textarea" class="text-xs font-semibold text-slate-300">Your Solution Notes & Approach:</label>
+        <textarea 
+          id="modal-notes-textarea" 
+          rows="6" 
+          placeholder="Jot down time & space complexity, tricky edge cases, key patterns, or alternative approaches..."
+          class="w-full p-3.5 rounded-xl bg-slate-900 text-sm text-slate-100 placeholder-slate-400 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-xs leading-relaxed"
+        ></textarea>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button id="btn-delete-note" class="text-xs text-rose-400 hover:text-rose-300">Clear Note</button>
+        <div class="flex items-center gap-2">
+          <button id="btn-close-notes" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 font-medium">Cancel</button>
+          <button id="btn-save-notes" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm text-white font-semibold shadow">Save Note</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Random Problem -->
+  <div id="modal-random" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-700 text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mx-auto text-indigo-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+      </div>
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Random Problem</span>
+        <h3 id="random-problem-title" class="text-xl font-bold text-white mt-1">Problem Title</h3>
+        <p id="random-problem-meta" class="text-xs text-slate-400 mt-1">Step 3 • Medium</p>
+      </div>
+
+      <div class="flex items-center justify-center gap-3 pt-2">
+        <button id="btn-random-pick-another" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-300">
+          Roll Another
+        </button>
+        <a id="random-problem-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs sm:text-sm font-semibold text-white shadow flex items-center gap-1.5">
+          Solve Problem
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
+      <button id="btn-close-random" class="text-xs text-slate-400 hover:text-white pt-2">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Modal: Reset Confirmation -->
+  <div id="modal-reset" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-rose-900/50 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Reset All Progress?</h3>
+          <p class="text-xs text-slate-400">This will remove all marked completions, bookmarks, and personal notes. You can export a backup first.</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="btn-cancel-reset" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 font-medium">Cancel</button>
+        <button id="btn-confirm-reset" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-sm text-white font-semibold">Yes, Reset Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden File Input for Importing Backup -->
+  <input type="file" id="import-file-input" accept=".json" class="hidden" />
+
+  <!-- Floating Toast Notifications Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <!-- Script Includes -->
+  <script src="js/questions-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

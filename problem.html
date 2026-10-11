@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Problem Details • Striver A2Z DSA</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- Background decorative glow -->
+  <div class="fixed inset-0 pointer-events-none gradient-glow -z-10"></div>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Back to Sheet Link & Breadcrumb -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition flex items-center gap-1.5 text-xs font-semibold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span class="hidden sm:inline">Back to Sheet</span>
+        </a>
+        <div class="h-4 w-px bg-slate-800 hidden sm:block"></div>
+        <span id="header-breadcrumb" class="text-xs text-slate-400 font-medium truncate max-w-xs sm:max-w-md">Step • Problem Details</span>
+      </div>
+
+      <!-- Right Header Actions: Solved Checkbox & Star -->
+      <div class="flex items-center gap-2.5">
+        <button id="btn-toggle-bookmark" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-amber-400 transition" title="Bookmark problem">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+        </button>
+
+        <button id="btn-toggle-solved" class="px-3.5 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-emerald-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          <span id="btn-solved-text">Mark Solved</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+    <!-- Problem Hero Card -->
+    <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 space-y-3">
+      
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Badges: Index, LC Number, Step, Difficulty -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="badge-sheet-index" class="font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">#1</span>
+          <span id="badge-lc" class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 hidden">LC #</span>
+          <span id="badge-difficulty" class="text-xs font-bold px-2.5 py-1 rounded-lg badge-medium">Medium</span>
+          <span id="badge-offline" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1 hidden">
+            <span>💻 Local / VS Code Practice</span>
+          </span>
+        </div>
+
+        <!-- External links (if available) -->
+        <div id="external-links-container" class="flex items-center gap-2"></div>
+      </div>
+
+      <div>
+        <h1 id="problem-title" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Problem Title</h1>
+        <p id="problem-subheading" class="text-xs sm:text-sm text-slate-400 mt-1">Step 1: Learn the Basics • Subtopic</p>
+      </div>
+
+      <!-- Tags -->
+      <div id="tags-container" class="flex items-center gap-1.5 flex-wrap pt-1"></div>
+
+    </div>
+
+    <!-- Offline Problem Statement & Specification -->
+    <div id="offline-problem-section" class="space-y-6">
+      
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Problem Statement
+          </h2>
+          <button id="btn-copy-description" class="text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            Copy Markdown
+          </button>
+        </div>
+        <div id="problem-statement-text" class="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-normal"></div>
+
+        <!-- Input / Output Format -->
+        <div id="io-format-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-800/80">
+          <div class="space-y-1">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Input Format</h3>
+            <p id="input-format-text" class="text-xs text-slate-300 whitespace-pre-line bg-slate-900/80 p-3 rounded-xl border border-slate-800 font-mono"></p>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Output Format</h3>
+            <p id="output-format-text" class="text-xs text-slate-300 whitespace-pre-line bg-slate-900/80 p-3 rounded-xl border border-slate-800 font-mono"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Examples Card -->
+      <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 space-y-4">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Examples & Test Cases
+        </h2>
+        <div id="examples-container" class="space-y-4"></div>
+      </div>
+
+      <!-- Constraints Card -->
+      <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 space-y-3">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span> Constraints
+        </h2>
+        <div id="constraints-text" class="text-xs sm:text-sm text-amber-200/90 font-mono bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 whitespace-pre-line"></div>
+      </div>
+
+    </div>
+
+    <!-- For Questions that are on external platforms -->
+    <div id="online-problem-section" class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 space-y-4 hidden">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">LC</div>
+        <div>
+          <h2 class="text-base font-bold text-white">Available on Coding Platforms</h2>
+          <p class="text-xs text-slate-400">This problem has official practice links on LeetCode, GeeksforGeeks, and Code360. You can solve it online or use the VS Code starter boilerplate below to write and test your solution locally.</p>
+        </div>
+      </div>
+
+      <div id="online-platform-buttons" class="flex items-center gap-3 flex-wrap pt-2"></div>
+    </div>
+
+    <!-- VS Code Starter Code Templates -->
+    <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            VS Code Starter Template
+          </h2>
+          <p class="text-xs text-slate-400">Ready-to-run boilerplate code with main/test function for your local editor.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Language Tabs -->
+          <div class="flex items-center bg-slate-900 rounded-xl p-1 border border-slate-800 text-xs">
+            <button data-lang="cpp" class="lang-tab px-3 py-1 rounded-lg font-semibold bg-indigo-600 text-white transition">C++</button>
+            <button data-lang="java" class="lang-tab px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white transition">Java</button>
+            <button data-lang="python" class="lang-tab px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white transition">Python</button>
+          </div>
+
+          <!-- Copy Button -->
+          <button id="btn-copy-code" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <span>Copy Code</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Code Box -->
+      <div class="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+        <pre class="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed"><code id="code-content">// Loading code template...</code></pre>
+      </div>
+    </div>
+
+    <!-- Personal Notes Section -->
+    <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800/80 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span> Your Solution Notes & Approach
+        </h2>
+        <button id="btn-save-note" class="text-xs font-semibold px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition">
+          Save Note
+        </button>
+      </div>
+      <textarea 
+        id="problem-notes-textarea" 
+        rows="5" 
+        placeholder="Document edge cases, time/space complexity O(N), approach intuition, or pitfall memories..."
+        class="w-full p-3.5 rounded-xl bg-slate-900 text-xs font-mono text-slate-100 placeholder-slate-400 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"
+      ></textarea>
+    </div>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <!-- Scripts -->
+  <script src="js/questions-data.js"></script>
+  <script>
+    (function() {
+      const STORAGE_KEY = 'striver_a2z_tracker_all_v1';
+      let state = {};
+      try {
+        state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        if (!state.completed) state.completed = {};
+        if (!state.starred) state.starred = {};
+        if (!state.notes) state.notes = {};
+      } catch (e) {
+        state = { completed: {}, starred: {}, notes: {} };
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch(e) {}
+      }
+
+      function showToast(msg, type = 'success') {
+        const c = document.getElementById('toast-container');
+        if (!c) return;
+        const t = document.createElement('div');
+        t.className = 'toast px-4 py-2.5 rounded-xl shadow-xl border text-xs font-semibold flex items-center gap-2 bg-slate-900 border-indigo-500/40 text-indigo-200';
+        t.innerHTML = `<span>✓</span><span>${msg}</span>`;
+        c.appendChild(t);
+        setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 250); }, 2500);
+      }
+
+      // Extract problem ID
+      const params = new URLSearchParams(window.location.search);
+      const qId = params.get('id') || 'q-1';
+
+      const data = window.STRIVER_DATA || { questions: [] };
+      const q = data.questions.find(item => item.id === qId) || data.questions[0];
+
+      if (!q) {
+        document.body.innerHTML = '<div class="p-10 text-center">Problem not found. <a href="index.html" class="text-indigo-400 underline">Return home</a></div>';
+        return;
+      }
+
+      // Populate Meta
+      document.title = `${q.title} • Striver A2Z DSA`;
+      document.getElementById('header-breadcrumb').textContent = `${q.stepTitle} • ${q.subStepTitle}`;
+      document.getElementById('badge-sheet-index').textContent = `Sheet #${q.sheetIndex}`;
+      document.getElementById('problem-title').textContent = q.title;
+      document.getElementById('problem-subheading').textContent = `${q.stepTitle} • ${q.subStepTitle}`;
+
+      // Difficulty
+      const diffBadge = document.getElementById('badge-difficulty');
+      diffBadge.textContent = q.difficulty;
+      if (q.difficulty === 'Easy') diffBadge.className = 'text-xs font-bold px-2.5 py-1 rounded-lg badge-easy';
+      else if (q.difficulty === 'Hard') diffBadge.className = 'text-xs font-bold px-2.5 py-1 rounded-lg badge-hard';
+      else diffBadge.className = 'text-xs font-bold px-2.5 py-1 rounded-lg badge-medium';
+
+      // LC Number
+      if (q.lcNumber) {
+        const lcB = document.getElementById('badge-lc');
+        lcB.textContent = `LC #${q.lcNumber}`;
+        lcB.classList.remove('hidden');
+      }
+
+      // Tags
+      const tagsC = document.getElementById('tags-container');
+      (q.tags || []).forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800';
+        span.textContent = t;
+        tagsC.appendChild(span);
+      });
+
+      // External links container
+      const extContainer = document.getElementById('external-links-container');
+      if (q.links) {
+        if (q.links.leetcode) {
+          extContainer.innerHTML += `<a href="${q.links.leetcode}" target="_blank" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/25 transition">Solve on LeetCode ↗</a>`;
+        }
+        if (q.links.gfg) {
+          extContainer.innerHTML += `<a href="${q.links.gfg}" target="_blank" class="px-2.5 py-1 rounded-lg bg-emerald-600/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold hover:bg-emerald-600/25 transition">Solve on GFG ↗</a>`;
+        }
+        if (q.links.code360) {
+          extContainer.innerHTML += `<a href="${q.links.code360}" target="_blank" class="px-2.5 py-1 rounded-lg bg-blue-600/15 border border-blue-500/30 text-blue-300 text-xs font-bold hover:bg-blue-600/25 transition">Code360 ↗</a>`;
+        }
+        if (q.links.youtube) {
+          extContainer.innerHTML += `<a href="${q.links.youtube}" target="_blank" class="px-2.5 py-1 rounded-lg bg-rose-600/15 border border-rose-500/30 text-rose-300 text-xs font-bold hover:bg-rose-600/25 transition">Video Solution 🎬</a>`;
+        }
+      }
+
+      // Check if Offline Problem
+      let currentCodeTemplates = {};
+
+      if (q.isOfflineProblem && q.localDetails) {
+        document.getElementById('badge-offline').classList.remove('hidden');
+        document.getElementById('problem-statement-text').textContent = q.localDetails.statement || '';
+        document.getElementById('input-format-text').textContent = q.localDetails.inputFormat || 'Standard competitive programming input format.';
+        document.getElementById('output-format-text').textContent = q.localDetails.outputFormat || 'Standard competitive programming output format.';
+        document.getElementById('constraints-text').textContent = q.localDetails.constraints || 'Standard constraints.';
+
+        const exContainer = document.getElementById('examples-container');
+        (q.localDetails.examples || []).forEach((ex, idx) => {
+          exContainer.innerHTML += `
+            <div class="bg-slate-900/80 rounded-xl p-4 border border-slate-800 space-y-2">
+              <span class="text-xs font-bold text-emerald-400">Example ${idx + 1}:</span>
+              <div class="space-y-1.5 font-mono text-xs">
+                <div><span class="text-slate-400">Input:</span> <span class="text-slate-200 bg-slate-950 px-2 py-0.5 rounded">${ex.input}</span></div>
+                <div><span class="text-slate-400">Output:</span> <span class="text-emerald-300 bg-slate-950 px-2 py-0.5 rounded font-bold">${ex.output}</span></div>
+                ${ex.explanation ? `<div class="text-slate-400 font-sans pt-1"><strong class="text-slate-300">Explanation:</strong> ${ex.explanation}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        currentCodeTemplates = q.localDetails.starterCode || {};
+      } else {
+        // Online Problem view
+        document.getElementById('offline-problem-section').classList.add('hidden');
+        const onlineSec = document.getElementById('online-problem-section');
+        onlineSec.classList.remove('hidden');
+
+        const onlineBtns = document.getElementById('online-platform-buttons');
+        onlineBtns.innerHTML = extContainer.innerHTML;
+
+        // Generate clean VS code local boilerplate
+        currentCodeTemplates = {
+          cpp: `// VS Code Local Testing Template for: ${q.title}\n// Striver A2Z Sheet - ${q.stepTitle}\n#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nclass Solution {\npublic:\n    void solve() {\n        // Write your solution here\n        cout << "Testing ${q.title} locally in VS Code!\\n";\n    }\n};\n\nint main() {\n    Solution solver;\n    solver.solve();\n    return 0;\n}`,
+          java: `// VS Code Local Testing Template for: ${q.title}\nimport java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        System.out.println("Testing ${q.title} locally in VS Code!");\n    }\n}`,
+          python: `# VS Code Local Testing Template for: ${q.title}\ndef solve():\n    print("Testing ${q.title} locally in VS Code!")\n\nif __name__ == "__main__":\n    solve()`
+        };
+      }
+
+      // Code template tab handler
+      let activeLang = 'cpp';
+      function renderCode() {
+        const codeBox = document.getElementById('code-content');
+        codeBox.textContent = currentCodeTemplates[activeLang] || `// No template available for ${activeLang}`;
+      }
+      renderCode();
+
+      document.querySelectorAll('.lang-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.lang-tab').forEach(t => {
+            t.classList.remove('bg-indigo-600', 'text-white');
+            t.classList.add('text-slate-400');
+          });
+          tab.classList.add('bg-indigo-600', 'text-white');
+          tab.classList.remove('text-slate-400');
+          activeLang = tab.getAttribute('data-lang');
+          renderCode();
+        });
+      });
+
+      // Copy Code button
+      document.getElementById('btn-copy-code').addEventListener('click', () => {
+        const code = document.getElementById('code-content').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+          showToast('Starter code copied for VS Code!');
+        });
+      });
+
+      // Copy Description button
+      const btnCopyDesc = document.getElementById('btn-copy-description');
+      if (btnCopyDesc && q.localDetails) {
+        btnCopyDesc.addEventListener('click', () => {
+          const text = `# ${q.title}\n\n${q.localDetails.statement}\n\n## Constraints\n${q.localDetails.constraints}`;
+          navigator.clipboard.writeText(text).then(() => {
+            showToast('Problem description copied as markdown!');
+          });
+        });
+      }
+
+      // Solved Button Toggle
+      const btnSolved = document.getElementById('btn-toggle-solved');
+      const textSolved = document.getElementById('btn-solved-text');
+      function updateSolvedUI() {
+        const isDone = !!state.completed[q.id];
+        if (isDone) {
+          btnSolved.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 bg-emerald-600 border-emerald-500 text-white';
+          textSolved.textContent = 'Completed ✓';
+        } else {
+          btnSolved.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-emerald-500';
+          textSolved.textContent = 'Mark Solved';
+        }
+      }
+      updateSolvedUI();
+
+      btnSolved.addEventListener('click', () => {
+        state.completed[q.id] = !state.completed[q.id];
+        saveState();
+        updateSolvedUI();
+        showToast(state.completed[q.id] ? 'Marked as completed! 🚀' : 'Marked uncompleted');
+      });
+
+      // Bookmark Button Toggle
+      const btnBookmark = document.getElementById('btn-toggle-bookmark');
+      function updateBookmarkUI() {
+        if (state.starred[q.id]) {
+          btnBookmark.className = 'p-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 transition';
+        } else {
+          btnBookmark.className = 'p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-amber-400 transition';
+        }
+      }
+      updateBookmarkUI();
+
+      btnBookmark.addEventListener('click', () => {
+        state.starred[q.id] = !state.starred[q.id];
+        saveState();
+        updateBookmarkUI();
+        showToast(state.starred[q.id] ? 'Bookmarked ⭐' : 'Bookmark removed');
+      });
+
+      // Notes
+      const notesArea = document.getElementById('problem-notes-textarea');
+      if (state.notes[q.id]) notesArea.value = state.notes[q.id];
+
+      document.getElementById('btn-save-note').addEventListener('click', () => {
+        const val = notesArea.value.trim();
+        if (val) state.notes[q.id] = val;
+        else delete state.notes[q.id];
+        saveState();
+        showToast('Note saved 📝');
+      });
+
+    })();
+  </script>
+</body>
+</html>
