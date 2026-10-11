@@ -53,7 +53,13 @@ An interactive, responsive, and modern web application to track your Data Struct
 6. **Organized by Striver's 18 Steps & Sub-Steps**:
    - Hierarchical accordions with "Expand All / Collapse All".
 
-7. **100% Local Storage & Portability**:
+7. **Automatic GitHub Cloud Sync (Multi-Device Progress Tracking) ☁️**:
+   - Connect with your GitHub account using a **Secret Private GitHub Gist**.
+   - Every time you check off a problem, star a question, or edit a note, it automatically syncs to your private GitHub backup in the background!
+   - Open your site on your phone or college computer, connect your Gist, and your progress syncs instantly!
+   - 100% private to your GitHub account with zero third-party databases.
+
+8. **100% Local Storage & Portability**:
    - Saves completion status, bookmarks, and notes in `localStorage`.
    - **Export Progress**: Download a `.json` backup anytime.
    - **Import Progress**: Restore your progress on any browser or device.
