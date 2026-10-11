@@ -48,11 +48,255 @@
     try {
       state.lastActive = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      triggerCloudSync();
     } catch (e) {
       console.error('Failed to save state to localStorage', e);
       showToast('Storage error or quota exceeded', 'error');
     }
   }
+
+  // --- GitHub Gist Cloud Sync Module ---
+  const SYNC_CONFIG_KEY = 'striver_github_sync_config_v1';
+  let syncDebounceTimer = null;
+
+  function getSyncConfig() {
+    try {
+      const saved = localStorage.getItem(SYNC_CONFIG_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return { token: '', gistId: '', autoSync: false, lastSynced: null };
+  }
+
+  function saveSyncConfig(cfg) {
+    try {
+      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(cfg));
+    } catch(e) {}
+    updateSyncUI();
+  }
+
+  function updateSyncUI(statusText, statusType) {
+    const cfg = getSyncConfig();
+    const syncDot = document.getElementById('sync-dot');
+    const syncText = document.getElementById('sync-text');
+
+    const connectedView = document.getElementById('sync-connected-view');
+    const setupView = document.getElementById('sync-setup-view');
+    const gistLink = document.getElementById('sync-gist-link');
+    const gistIdDisplay = document.getElementById('sync-gist-id-display');
+    const lastTimeDisplay = document.getElementById('sync-last-time');
+
+    const isConnected = !!(cfg.token && cfg.gistId);
+
+    if (isConnected) {
+      if (connectedView) connectedView.classList.remove('hidden');
+      if (setupView) setupView.classList.add('hidden');
+      if (gistLink) {
+        gistLink.href = 'https://gist.github.com/' + cfg.gistId;
+        gistLink.textContent = 'gist.github.com/' + cfg.gistId.slice(0, 10) + '... ↗';
+      }
+      if (gistIdDisplay) gistIdDisplay.textContent = cfg.gistId;
+      if (lastTimeDisplay) {
+        const d = cfg.lastSynced ? new Date(cfg.lastSynced).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Never';
+        lastTimeDisplay.textContent = 'Last synced: ' + d;
+      }
+
+      if (syncDot) {
+        if (statusType === 'syncing') {
+          syncDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+          if (syncText) syncText.textContent = statusText || 'Syncing...';
+        } else if (statusType === 'error') {
+          syncDot.className = 'w-2 h-2 rounded-full bg-rose-400';
+          if (syncText) syncText.textContent = statusText || 'Sync Error';
+        } else {
+          syncDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          if (syncText) syncText.textContent = 'Cloud Synced';
+        }
+      }
+    } else {
+      if (connectedView) connectedView.classList.add('hidden');
+      if (setupView) setupView.classList.remove('hidden');
+      if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+      if (syncText) syncText.textContent = 'Cloud Sync';
+    }
+  }
+
+  function triggerCloudSync() {
+    const cfg = getSyncConfig();
+    if (!cfg.token || !cfg.gistId || !cfg.autoSync) return;
+
+    if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+    updateSyncUI('Syncing...', 'syncing');
+
+    syncDebounceTimer = setTimeout(async () => {
+      try {
+        const response = await fetch('https://api.github.com/gists/' + cfg.gistId, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': 'Bearer ' + cfg.token,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            description: 'Striver DSA Tracker Progress Backup (Private)',
+            files: {
+              'striver_progress.json': {
+                content: JSON.stringify({
+                  version: '3.0',
+                  updatedAt: new Date().toISOString(),
+                  state: state
+                }, null, 2)
+              }
+            }
+          })
+        });
+
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        cfg.lastSynced = new Date().toISOString();
+        saveSyncConfig(cfg);
+        updateSyncUI('Synced', 'success');
+      } catch (err) {
+        console.error('Cloud sync push failed', err);
+        updateSyncUI('Sync Error', 'error');
+      }
+    }, 1500);
+  }
+
+  async function pullFromGist(manual = false) {
+    const cfg = getSyncConfig();
+    if (!cfg.token || !cfg.gistId) return;
+
+    updateSyncUI('Syncing...', 'syncing');
+
+    try {
+      const response = await fetch('https://api.github.com/gists/' + cfg.gistId, {
+        headers: {
+          'Authorization': 'Bearer ' + cfg.token,
+          'Accept': 'application/vnd.github+json'
+        }
+      });
+
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const data = await response.json();
+      const file = data.files && data.files['striver_progress.json'];
+      if (!file || !file.content) throw new Error('File not found in Gist');
+
+      const parsed = JSON.parse(file.content);
+      const remoteState = parsed.state || parsed;
+
+      let changed = false;
+      Object.keys(remoteState.completed || {}).forEach(k => {
+        if (remoteState.completed[k] && !state.completed[k]) {
+          state.completed[k] = true;
+          changed = true;
+        }
+      });
+      Object.keys(remoteState.starred || {}).forEach(k => {
+        if (remoteState.starred[k] && !state.starred[k]) {
+          state.starred[k] = true;
+          changed = true;
+        }
+      });
+      Object.keys(remoteState.notes || {}).forEach(k => {
+        if (!state.notes[k] || state.notes[k].trim() === '') {
+          state.notes[k] = remoteState.notes[k];
+          changed = true;
+        }
+      });
+
+      cfg.lastSynced = new Date().toISOString();
+      saveSyncConfig(cfg);
+
+      if (changed || manual) {
+        state.lastActive = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
+        if (manual) showToast('Progress synced with GitHub Gist! ☁️', 'success');
+      }
+      updateSyncUI('Synced', 'success');
+    } catch (err) {
+      console.error('Failed to pull from Gist', err);
+      updateSyncUI('Sync Error', 'error');
+      if (manual) showToast('GitHub Sync error: ' + err.message, 'error');
+    }
+  }
+
+  async function connectNewGist(token) {
+    showToast('Creating private backup Gist on GitHub...', 'info');
+    try {
+      const response = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          description: 'Striver DSA Tracker Progress Backup (Private)',
+          public: false,
+          files: {
+            'striver_progress.json': {
+              content: JSON.stringify({
+                version: '3.0',
+                updatedAt: new Date().toISOString(),
+                state: state
+              }, null, 2)
+            }
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'HTTP ' + response.status);
+      }
+
+      const gist = await response.json();
+      const cfg = {
+        token: token,
+        gistId: gist.id,
+        autoSync: true,
+        lastSynced: new Date().toISOString()
+      };
+      saveSyncConfig(cfg);
+      showToast('Connected to GitHub Gist! Cloud sync is active 🚀', 'success');
+      return true;
+    } catch (err) {
+      showToast('GitHub Connection Error: ' + err.message, 'error');
+      return false;
+    }
+  }
+
+  async function connectExistingGist(token, gistId) {
+    showToast('Connecting to existing Gist...', 'info');
+    try {
+      const response = await fetch('https://api.github.com/gists/' + gistId, {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/vnd.github+json'
+        }
+      });
+      if (!response.ok) throw new Error('Gist not found or unauthorized (HTTP ' + response.status + ')');
+      const cfg = {
+        token: token,
+        gistId: gistId,
+        autoSync: true,
+        lastSynced: new Date().toISOString()
+      };
+      saveSyncConfig(cfg);
+      await pullFromGist(true);
+      showToast('Connected to existing Gist and progress synced!', 'success');
+      return true;
+    } catch (err) {
+      showToast('Connection failed: ' + err.message, 'error');
+      return false;
+    }
+  }
+
+  function disconnectSync() {
+    saveSyncConfig({ token: '', gistId: '', autoSync: false, lastSynced: null });
+    showToast('GitHub Cloud Sync disconnected', 'info');
+  }
+
 
   // --- Theme Controller ---
   function initTheme() {
@@ -1106,6 +1350,89 @@
     if (btnCloseNoteX) btnCloseNoteX.addEventListener('click', () => window.app.closeNotesModal());
     if (btnDeleteNote) btnDeleteNote.addEventListener('click', () => window.app.deleteNote());
 
+    // --- GitHub Sync Event Listeners ---
+    const modalSync = document.getElementById('modal-github-sync');
+    const openSyncModal = () => {
+      updateSyncUI();
+      if (modalSync) modalSync.classList.remove('hidden');
+      if (menuDropdown) menuDropdown.classList.add('hidden');
+    };
+    const closeSyncModal = () => {
+      if (modalSync) modalSync.classList.add('hidden');
+    };
+
+    const btnSyncStatus = document.getElementById('btn-sync-status');
+    const btnOpenSyncModal = document.getElementById('btn-open-sync-modal');
+    if (btnSyncStatus) btnSyncStatus.addEventListener('click', openSyncModal);
+    if (btnOpenSyncModal) btnOpenSyncModal.addEventListener('click', openSyncModal);
+
+    const btnCloseSyncX = document.getElementById('btn-close-sync-modal-x');
+    const btnCloseSync = document.getElementById('btn-close-sync-modal');
+    const btnCloseSyncCancel = document.getElementById('btn-close-sync-modal-cancel');
+    if (btnCloseSyncX) btnCloseSyncX.addEventListener('click', closeSyncModal);
+    if (btnCloseSync) btnCloseSync.addEventListener('click', closeSyncModal);
+    if (btnCloseSyncCancel) btnCloseSyncCancel.addEventListener('click', closeSyncModal);
+
+    // Connect button
+    const btnConnectSync = document.getElementById('btn-connect-sync');
+    if (btnConnectSync) {
+      btnConnectSync.addEventListener('click', async () => {
+        const tokenInput = document.getElementById('input-sync-token');
+        const gistIdInput = document.getElementById('input-sync-gist-id');
+        const token = tokenInput ? tokenInput.value.trim() : '';
+        const gistId = gistIdInput ? gistIdInput.value.trim() : '';
+
+        if (!token) {
+          showToast('Please enter your GitHub Personal Access Token', 'error');
+          return;
+        }
+
+        btnConnectSync.disabled = true;
+        btnConnectSync.textContent = 'Connecting...';
+
+        let success = false;
+        if (gistId) {
+          success = await connectExistingGist(token, gistId);
+        } else {
+          success = await connectNewGist(token);
+        }
+
+        btnConnectSync.disabled = false;
+        btnConnectSync.textContent = 'Connect & Start Syncing';
+
+        if (success) {
+          if (tokenInput) tokenInput.value = '';
+          if (gistIdInput) gistIdInput.value = '';
+          updateSyncUI();
+        }
+      });
+    }
+
+    // Disconnect button
+    const btnDisconnectSync = document.getElementById('btn-disconnect-sync');
+    if (btnDisconnectSync) {
+      btnDisconnectSync.addEventListener('click', () => {
+        disconnectSync();
+        updateSyncUI();
+      });
+    }
+
+    // Manual Sync buttons
+    const btnSyncNow = document.getElementById('btn-sync-now');
+    const btnTriggerManualSync = document.getElementById('btn-trigger-manual-sync');
+    if (btnSyncNow) {
+      btnSyncNow.addEventListener('click', () => {
+        if (menuDropdown) menuDropdown.classList.add('hidden');
+        pullFromGist(true);
+      });
+    }
+    if (btnTriggerManualSync) {
+      btnTriggerManualSync.addEventListener('click', () => {
+        pullFromGist(true);
+      });
+    }
+
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -1121,6 +1448,8 @@
     initTheme();
     initEvents();
     renderAll();
+    updateSyncUI();
+    pullFromGist(false);
   });
 
 })();
